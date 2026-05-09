@@ -1,0 +1,31 @@
+# Version: 0.01
+name: Sync to Gitee
+on:
+  push:
+    branches:
+      - main  # 只有推送到 GitHub 的 main 分支才会触发同步
+
+jobs:
+  repo-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 拉取完整历史，确保同步记录完整
+
+      - name: Push to Gitee (Final Manual Mode)
+        env:
+          G_TOKEN: ${{ secrets.GITEE_TOKEN }}
+          # 修改此处：填入你刚才在 Gitee 新建的仓库名称
+          TARGET_REPO: "linux2026" 
+        run: |
+          # 1. 核心防御：禁止终端交互，报错立刻停止，绝不卡死
+          export GIT_TERMINAL_PROMPT=0
+          
+          # 2. 身份配置（让 Gitee 知道是谁在提交）
+          git config --global user.email "820649664@qq.com"
+          git config --global user.name "uaenawook"
+          
+          # 3. 执行强制推送，动态加载仓库名称变量
+          git push -f https://uaenawook:${G_TOKEN}@gitee.com/uaenawook/${TARGET_REPO}.git main:main
